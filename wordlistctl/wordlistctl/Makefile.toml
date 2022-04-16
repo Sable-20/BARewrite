@@ -1,0 +1,39 @@
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.debug]
+command = "cargo"
+args = ["build"]
+dependencies = ["clean"]
+
+[tasks.final]
+script_runner = "perl"
+script_extension = "pl"
+script = '''
+use File::Copy;
+
+if (-d "out") {
+    mkdir("out") or die "could not create directory";
+}
+move("target/release/wordlistctl", "out/wordlistctl") or die "failed to move binary to out folder";
+move("res/repo.json", "out/repo.json") or die "failed to move repo.json into out folder";
+'''
+
+[tasks.release]
+command = "cargo"
+args = ["build", "--release"]
+dependencies = ["clean"]
+
+[tasks.all]
+dependencies = [
+    "clean",
+    "format",
+    "release",
+    "final"
+]
